@@ -9,9 +9,16 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route('/')
 def index():
-    posts = Post.query.all() 
+    page = request.args.get('page', 1, type = int)
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page = page, per_page =5)
     return render_template('index.html', posts=posts)
 
+@app.route('/user/<string:user_name>')
+def user_posts(user_name):
+    page = request.args.get('page', 1, type = int)
+    user = User.query.filter_by(username = user_name).first_or_404()
+    posts = Post.query.filter_by(author = user).order_by(Post.date_posted.desc()).paginate(page = page, per_page =5)
+    return render_template('user_posts.html', posts=posts, user = user)
 
 @app.route('/about')
 def about():
@@ -20,7 +27,7 @@ def about():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated: 
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -43,7 +50,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        print(user)
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             flash(f'Welcome {form.email.data}!', 'success')
