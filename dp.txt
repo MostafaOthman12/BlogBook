@@ -1,0 +1,7 @@
+newadmin = Admin(userName="Dr Usama", password="dc2d1528c94118c8d8485c9db937b0468bf2eaadca6858e08d87cf630a941386")
+session.add(newadmin)
+session.commit()
+
+newpass=Password(passwordd="TopTop")
+session.add(newpass)
+session.commit()
